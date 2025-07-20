@@ -48,6 +48,15 @@ dependencies {
 		testImplementation 'org.springframework.boot:spring-boot-starter-test'
 		testImplementation 'org.springframework.security:spring-security-test'
 		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+		// OCR com Tesseract (Tess4J)
+		implementation 'net.sourceforge.tess4j:tess4j:4.5.5'
+
+		// Telegram Bots (long polling)
+		implementation 'org.telegram:telegrambots-spring-boot-starter:6.8.0'
+
+		// Utilitários (opcional)
+		implementation 'commons-io:commons-io:2.15.1'
 	}
 
 }
