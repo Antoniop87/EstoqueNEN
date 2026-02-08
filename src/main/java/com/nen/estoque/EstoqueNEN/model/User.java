@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Table(name = "users")
@@ -24,6 +25,13 @@ public class User {
     private String email;
 
     private String password;
+
+    private String nome;
+
+    private String sobrenome;
+
+    @Column(name = "data_nascimento")
+    private LocalDate dataNascimento;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(name="users_roles",

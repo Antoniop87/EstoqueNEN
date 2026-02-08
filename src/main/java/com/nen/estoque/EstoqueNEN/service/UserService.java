@@ -53,6 +53,9 @@ public class UserService {
         // Cria um novo usuário com os dados fornecidos
         User newUser = User.builder()
                 .email(createUserDto.email())
+                .nome(createUserDto.nome())
+                .sobrenome(createUserDto.sobrenome())
+                .dataNascimento(createUserDto.dataNascimento())
                 // Codifica a senha do usuário com o algoritmo bcrypt
                 .password(securityConfiguration.passwordEncoder().encode(createUserDto.password()))
                 // Atribui ao usuário uma permissão específica
