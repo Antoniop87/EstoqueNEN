@@ -44,7 +44,10 @@ public class UserService {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
         // Gera um token JWT para o usuário autenticado
-        return new RecoveryJwtTokenDto(jwtTokenService.generateToken(userDetails));
+        return new RecoveryJwtTokenDto(jwtTokenService.generateToken(userDetails),
+                userDetails.getId(),
+                userDetails.getNome(),
+                userDetails.getSobrenome());
     }
 
     // Método responsável por criar um usuário
@@ -59,7 +62,7 @@ public class UserService {
                 // Codifica a senha do usuário com o algoritmo bcrypt
                 .password(securityConfiguration.passwordEncoder().encode(createUserDto.password()))
                 // Atribui ao usuário uma permissão específica
-                .roles(List.of(Role.builder().name(createUserDto.role()).build()))
+                //.roles(List.of(Role.builder().name(createUserDto.role()).build()))
                 .build();
 
         // Salva o novo usuário no banco de dados

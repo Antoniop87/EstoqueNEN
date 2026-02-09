@@ -43,6 +43,17 @@ public class UserDetailsImpl implements UserDetails {
         return user.getEmail();
     } // Retorna o nome de usuário do usuário que criamos anteriormente
 
+    public Long getId() {
+        return user.getId();
+    }
+
+    public String getNome() {
+        return user.getNome();
+    }
+
+    public String getSobrenome() {
+        return user.getSobrenome();
+    }
     @Override
     public boolean isAccountNonExpired() {
         return true;
