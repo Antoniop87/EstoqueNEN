@@ -1,0 +1,23 @@
+# Blueprint do Render: cria o serviço da API a partir deste repositório.
+# Valores com "sync: false" são pedidos no painel na criação (segredos não ficam no git).
+services:
+  - type: web
+    name: nick-finance-api
+    runtime: docker
+    region: virginia
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      # O Render gera um segredo aleatório para assinar os tokens de login.
+      - key: JWT_SECRET
+        generateValue: true
+      - key: TELEGRAM_BOT_USERNAME
+        value: UserNickFinanceBot
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false

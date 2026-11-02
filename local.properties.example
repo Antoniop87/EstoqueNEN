@@ -1,0 +1,6 @@
+# Copie este arquivo para "local.properties" (na raiz do projeto) e preencha.
+# O local.properties fica fora do git: nunca coloque tokens ou senhas no application.properties.
+
+# Bot do Telegram (crie com o @BotFather)
+telegram.bot.username=UserNickFinanceBot
+telegram.bot.token=COLE_AQUI_O_TOKEN

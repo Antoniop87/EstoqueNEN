@@ -1,0 +1,10 @@
+.git
+.gradle
+.idea
+.vscode
+build
+out
+bin
+*.iml
+# Segredos locais nunca entram na imagem; em produção use variáveis de ambiente.
+local.properties
