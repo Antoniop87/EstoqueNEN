@@ -24,43 +24,39 @@ repositories {
 }
 
 dependencies {
-	dependencies {
-		// Dependências principais
-		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-		implementation 'org.springframework.boot:spring-boot-starter-security'
-		implementation 'org.springframework.boot:spring-boot-starter-web'
+	// Spring
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-		// JWT
-		implementation 'com.auth0:java-jwt:4.4.0'
+	// JWT
+	implementation 'com.auth0:java-jwt:4.4.0'
 
-		// Lombok (em tempo de compilação e para geração de código)
-		compileOnly 'org.projectlombok:lombok'
-		annotationProcessor 'org.projectlombok:lombok'
+	// Bot do Telegram (long polling)
+	implementation 'org.telegram:telegrambots:6.8.0'
 
-		// DevTools (somente em desenvolvimento)
-		developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	// Lombok (em tempo de compilação)
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 
-		// Banco de dados
-		runtimeOnly 'com.h2database:h2'
-		runtimeOnly 'org.postgresql:postgresql' // adicionada do seu build.gradle
+	// DevTools (somente em desenvolvimento; não vai para o jar de produção)
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-		// Dependências de teste
-		testImplementation 'org.springframework.boot:spring-boot-starter-test'
-		testImplementation 'org.springframework.security:spring-security-test'
-		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	// Banco de dados
+	runtimeOnly 'org.postgresql:postgresql'
 
-		// OCR com Tesseract (Tess4J)
-		implementation 'net.sourceforge.tess4j:tess4j:4.5.5'
-
-		// Telegram Bots (long polling)
-		implementation 'org.telegram:telegrambots-spring-boot-starter:6.8.0'
-
-		// Utilitários (opcional)
-		implementation 'commons-io:commons-io:2.15.1'
-	}
-
+	// Testes
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// Nome fixo do jar executável, usado pelo Dockerfile.
+tasks.named('bootJar') {
+	archiveFileName = 'app.jar'
 }

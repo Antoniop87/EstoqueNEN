@@ -1,6 +1,5 @@
 package com.nen.estoque.EstoqueNEN.model;
 
-import com.fasterxml.jackson.annotation.JsonSetter;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,23 +25,14 @@ public class Despesa {
 
     private BigDecimal valorDespesa;
 
+    /** Gravada como meia-noite UTC; use {@link com.nen.estoque.EstoqueNEN.util.Datas} para converter. */
     private Date dataDespesa;
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private User usuario;
 
-    public User getUsuario() {
-        return usuario;
-    }
-
-    @JsonSetter("usuario")
-    public void setUsuarioById(Long usuarioId) {
-        if (usuarioId != null) {
-            this.usuario = new User();
-            this.usuario.setId(usuarioId);
-        } else {
-            this.usuario = null;
-        }
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoria_id")
+    private Categoria categoria;
 }

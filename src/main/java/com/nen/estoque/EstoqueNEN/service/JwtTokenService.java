@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.nen.estoque.EstoqueNEN.details.UserDetailsImpl;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -14,14 +15,23 @@ import java.time.ZonedDateTime;
 @Service
 public class JwtTokenService {
 
-    private static final String SECRET_KEY = "4Z^XrroxR@dWxqf$mTTKwW$!@#qGr4P"; // Chave secreta utilizada para gerar e verificar o token
+    private static final String ISSUER = "nick-finance-api"; // Emissor do token
 
-    private static final String ISSUER = "pizzurg-api"; // Emissor do token
+    /** Tamanho mínimo do segredo para o HMAC-SHA256 ser seguro. */
+    private static final int TAMANHO_MINIMO_SEGREDO = 32;
+
+    private final Algorithm algorithm; // HMAC SHA256 com o segredo da configuração (jwt.secret / JWT_SECRET)
+
+    public JwtTokenService(@Value("${jwt.secret}") String secret) {
+        if (secret == null || secret.length() < TAMANHO_MINIMO_SEGREDO) {
+            throw new IllegalStateException(
+                    "jwt.secret (JWT_SECRET) precisa ter pelo menos " + TAMANHO_MINIMO_SEGREDO + " caracteres.");
+        }
+        this.algorithm = Algorithm.HMAC256(secret);
+    }
 
     public String generateToken(UserDetailsImpl user) {
         try {
-            // Define o algoritmo HMAC SHA256 para criar a assinatura do token passando a chave secreta definida
-            Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
             return JWT.create()
                     .withIssuer(ISSUER) // Define o emissor do token
                     .withIssuedAt(creationDate()) // Define a data de emissão do token
@@ -35,8 +45,6 @@ public class JwtTokenService {
 
     public String getSubjectFromToken(String token) {
         try {
-            // Define o algoritmo HMAC SHA256 para verificar a assinatura do token passando a chave secreta definida
-            Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
             return JWT.require(algorithm)
                     .withIssuer(ISSUER) // Define o emissor do token
                     .build()

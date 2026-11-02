@@ -1,5 +1,6 @@
 package com.nen.estoque.EstoqueNEN.security;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.nen.estoque.EstoqueNEN.details.UserDetailsImpl;
 import com.nen.estoque.EstoqueNEN.filter.SecurityConfigurationFilter;
 import com.nen.estoque.EstoqueNEN.model.User;
@@ -34,21 +35,24 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
         if (checkIfEndpointIsNotPublic(request)) {
             String token = recoveryToken(request); // Recupera o token do cabeçalho Authorization da requisição
             if (token != null) {
-                String subject = jwtTokenService.getSubjectFromToken(token); // Obtém o assunto (neste caso, o nome de usuário) do token
-                User user = userRepository.findByEmail(subject).get(); // Busca o usuário pelo email (que é o assunto do token)
-                UserDetailsImpl userDetails = new UserDetailsImpl(user); // Cria um UserDetails com o usuário encontrado
-
-                // Cria um objeto de autenticação do Spring Security
-                Authentication authentication =
-                        new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
-
-                // Define o objeto de autenticação no contexto de segurança do Spring Security
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } else {
-                throw new RuntimeException("O token está ausente.");
+                try {
+                    String subject = jwtTokenService.getSubjectFromToken(token); // Obtém o assunto (neste caso, o nome de usuário) do token
+                    userRepository.findByEmail(subject).ifPresent(this::authenticate); // Busca o usuário pelo email (que é o assunto do token)
+                } catch (JWTVerificationException exception) {
+                    // Token inválido ou expirado: segue sem autenticação e o Spring Security responde 403
+                }
             }
+            // Sem token, a requisição segue anônima e o Spring Security responde 403 (em vez de um 500)
         }
         filterChain.doFilter(request, response); // Continua o processamento da requisição
+    }
+
+    // Define o usuário autenticado no contexto de segurança do Spring Security
+    private void authenticate(User user) {
+        UserDetailsImpl userDetails = new UserDetailsImpl(user);
+        Authentication authentication =
+                new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     // Recupera o token do cabeçalho Authorization da requisição

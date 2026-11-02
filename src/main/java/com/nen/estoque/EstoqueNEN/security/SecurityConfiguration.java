@@ -22,14 +22,9 @@ public class SecurityConfiguration {
 
     public static final String [] ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED = {
             "/users/login", // Url que usaremos para fazer login
-            "/users" // Url que usaremos para criar um usuário
-    };
-
-    // Endpoints que requerem autenticação para serem acessados
-    public static final String [] ENDPOINTS_WITH_AUTHENTICATION_REQUIRED = {
-            "/users/test",
-            "/despesa",
-            "/despesa/lista/usuario/{id}"
+            "/users", // Url que usaremos para criar um usuário
+            "/error", // Página de erro do Spring; sem isso, 400/500 viram 403
+            "/health" // Verificação de saúde (host e monitor)
     };
 
     // Endpoints que só podem ser acessador por usuários com permissão de cliente
@@ -49,10 +44,10 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED).permitAll()
-                        .requestMatchers(ENDPOINTS_WITH_AUTHENTICATION_REQUIRED).authenticated()
                         .requestMatchers(ENDPOINTS_ADMIN).hasRole("ADMINISTRATOR")
                         .requestMatchers(ENDPOINTS_CUSTOMER).hasRole("CUSTOMER")
-                        .anyRequest().denyAll()
+                        // Todo o resto exige login; cada service filtra os dados pelo usuário do token.
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(userAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
