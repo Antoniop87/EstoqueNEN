@@ -53,7 +53,7 @@ public class TelegramLancamentoService {
 
         Long id = lancamentoService.criar(usuario, new LancamentoService.Novo(
                 lancamento.tipo(), lancamento.descricao(), lancamento.detalhe(), lancamento.valor(),
-                lancamento.data(), categoria));
+                lancamento.data(), categoria, lancamento.formaPagamento()));
 
         OrcamentoService.Situacao alerta = null;
         if (lancamento.tipo() == TipoLancamento.DESPESA && categoria != null) {

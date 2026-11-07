@@ -1,6 +1,7 @@
 package com.nen.estoque.EstoqueNEN.dto;
 
 import com.nen.estoque.EstoqueNEN.model.Despesa;
+import com.nen.estoque.EstoqueNEN.model.FormaPagamento;
 import com.nen.estoque.EstoqueNEN.util.Datas;
 import jakarta.validation.constraints.*;
 
@@ -27,13 +28,16 @@ public final class DespesaDto {
             @NotNull
             LocalDate data,
 
-            Long categoriaId
+            Long categoriaId,
+
+            /** Opcional: clientes antigos (ex.: app Android) ainda não enviam. */
+            FormaPagamento formaPagamento
 
     ) {
     }
 
     public record Response(Long id, String descricao, String estabelecimento, BigDecimal valor,
-                           LocalDate data, Long categoriaId) {
+                           LocalDate data, Long categoriaId, FormaPagamento formaPagamento) {
 
         public static Response from(Despesa despesa) {
             return new Response(
@@ -42,7 +46,8 @@ public final class DespesaDto {
                     despesa.getEstabelecimento(),
                     despesa.getValorDespesa(),
                     Datas.paraLocalDate(despesa.getDataDespesa()),
-                    despesa.getCategoria() == null ? null : despesa.getCategoria().getId()
+                    despesa.getCategoria() == null ? null : despesa.getCategoria().getId(),
+                    despesa.getFormaPagamento()
             );
         }
     }

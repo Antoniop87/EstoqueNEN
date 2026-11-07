@@ -1,6 +1,7 @@
 package com.nen.estoque.EstoqueNEN;
 
 import com.nen.estoque.EstoqueNEN.dto.*;
+import com.nen.estoque.EstoqueNEN.model.FormaPagamento;
 import com.nen.estoque.EstoqueNEN.model.TipoLancamento;
 import com.nen.estoque.EstoqueNEN.model.User;
 import com.nen.estoque.EstoqueNEN.repository.UserRepository;
@@ -88,8 +89,13 @@ class PlanejamentoIntegracaoTest {
         ReceitaDto.Response receita = receitaService.criar(
                 new ReceitaDto.Request("Salário", "Empresa", new BigDecimal("1000"), LocalDate.of(2026, 10, 5), null));
 
-        DespesaDto.Response editada = despesaService.atualizar(despesa.id(), despesa("Feira", "42.50", null));
+        assertNull(despesa.formaPagamento(), "sem forma informada (clientes antigos) continua aceito");
+
+        DespesaDto.Response editada = despesaService.atualizar(despesa.id(), new DespesaDto.Request(
+                "Feira", null, new BigDecimal("42.50"), LocalDate.of(2026, 10, 5), null, FormaPagamento.CREDITO));
         assertEquals("Feira", editada.descricao());
+        assertEquals(FormaPagamento.CREDITO, editada.formaPagamento());
+        assertEquals(FormaPagamento.CREDITO, despesaService.listarDoUsuarioLogado().get(0).formaPagamento());
         assertEquals(0, new BigDecimal("42.50").compareTo(editada.valor()));
         assertEquals(LocalDate.of(2026, 10, 5), editada.data(), "a data deve voltar igual");
 
@@ -198,7 +204,7 @@ class PlanejamentoIntegracaoTest {
     // ---------- Apoio ----------
 
     private DespesaDto.Request despesa(String descricao, String valor, Long categoriaId) {
-        return new DespesaDto.Request(descricao, null, new BigDecimal(valor), LocalDate.of(2026, 10, 5), categoriaId);
+        return new DespesaDto.Request(descricao, null, new BigDecimal(valor), LocalDate.of(2026, 10, 5), categoriaId, null);
     }
 
     private RecorrenciaDto.Request recorrencia(String descricao, TipoLancamento tipo, int dia) {

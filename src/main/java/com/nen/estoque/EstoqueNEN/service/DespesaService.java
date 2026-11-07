@@ -62,6 +62,7 @@ public class DespesaService {
         despesa.setValorDespesa(dto.valor());
         despesa.setDataDespesa(Datas.paraDate(dto.data()));
         despesa.setCategoria(categoriaService.buscarParaLancamento(dto.categoriaId(), usuario, TipoLancamento.DESPESA));
+        despesa.setFormaPagamento(dto.formaPagamento());
     }
 
     static String textoOuNulo(String texto) {

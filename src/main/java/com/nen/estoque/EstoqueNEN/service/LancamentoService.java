@@ -22,8 +22,9 @@ public class LancamentoService {
     private final DespesaRepository despesaRepository;
     private final ReceitaRepository receitaRepository;
 
+    /** @param formaPagamento só vale para despesas; pode ser nulo */
     public record Novo(TipoLancamento tipo, String descricao, String detalhe, BigDecimal valor,
-                       LocalDate data, Categoria categoria) {
+                       LocalDate data, Categoria categoria, FormaPagamento formaPagamento) {
     }
 
     /** @return id do lançamento criado */
@@ -45,6 +46,7 @@ public class LancamentoService {
                 .valorDespesa(novo.valor())
                 .dataDespesa(Datas.paraDate(novo.data()))
                 .categoria(novo.categoria())
+                .formaPagamento(novo.formaPagamento())
                 .usuario(usuario)
                 .build()).getId();
     }

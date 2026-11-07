@@ -102,7 +102,7 @@ public class RecorrenciaService {
             return false;
         }
         lancamentoService.criar(r.getUsuario(), new LancamentoService.Novo(
-                r.getTipo(), r.getDescricao(), r.getDetalhe(), r.getValor(), data, r.getCategoria()));
+                r.getTipo(), r.getDescricao(), r.getDetalhe(), r.getValor(), data, r.getCategoria(), null));
         r.setUltimoMesGerado(mes.toString());
         return true;
     }

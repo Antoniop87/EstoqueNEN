@@ -159,6 +159,9 @@ public class NickFinanceBot extends TelegramLongPollingBot {
         if (lancamento.detalhe() != null) {
             resposta.append(receita ? "🏢 " : "🏪 ").append(escapar(lancamento.detalhe())).append('\n');
         }
+        if (lancamento.formaPagamento() != null) {
+            resposta.append("💳 ").append(lancamento.formaPagamento().getRotulo()).append('\n');
+        }
         if (registro.categoria() != null) {
             resposta.append("🏷️ ").append(escapar(registro.categoria())).append('\n');
         }
@@ -236,7 +239,7 @@ public class NickFinanceBot extends TelegramLongPollingBot {
         return """
                 • <code>gastei 45,90 com almoço no Restaurante Sabor</code>
                 • <code>recebi 5200 de salário da Empresa X</code>
-                • <code>uber 32,40 ontem</code>
+                • <code>uber 32,40 ontem no crédito</code>
                 • <code>+150 venda 05/10</code>""";
     }
 

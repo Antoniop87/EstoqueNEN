@@ -1,5 +1,6 @@
 package com.nen.estoque.EstoqueNEN.telegram;
 
+import com.nen.estoque.EstoqueNEN.model.FormaPagamento;
 import com.nen.estoque.EstoqueNEN.model.TipoLancamento;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +30,9 @@ import java.util.regex.Pattern;
  * conectores e artigos no começo do que sobra ("com", "de", "uma"...) são descartados; o texto
  * restante vira descrição, e o trecho após "no/na/em" (despesa) ou "do/da" (receita) vira
  * estabelecimento/origem. Ex.: "gastei 20 reais hoje com lazer" → descrição "Lazer".
+ * Em despesas, "no crédito", "no cartão", "no débito", "no pix" ou "em dinheiro" definem a forma
+ * de pagamento e saem do texto. Só a primeira palavra decide o tipo, então "crédito" no começo
+ * ainda é entrada ("crédito 50 reembolso").
  */
 @Component
 public class MensagemParser {
@@ -56,6 +60,8 @@ public class MensagemParser {
     private static final Set<String> CONECTORES_SO_DE_DESCRICAO_NO_INICIO = Set.of("em", "num", "numa");
     private static final Set<String> CONECTORES_DETALHE_RECEITA = Set.of("do", "da", "dos", "das", "pelo", "pela");
     private static final Set<String> PREFIXOS_DATA = Set.of("em", "dia", "no");
+    /** Introduzem a forma de pagamento ("no crédito", "via pix", "em dinheiro") e saem junto com ela. */
+    private static final Set<String> PREFIXOS_PAGAMENTO = Set.of("no", "na", "em", "via", "pelo", "pela", "com", "de");
 
     private static final Pattern VALOR = Pattern.compile(
             "^([+-])?(?:r\\$)?(\\d{1,3}(?:\\.\\d{3})+(?:,\\d{1,2})?|\\d+(?:[.,]\\d{1,2})?)$");
@@ -79,7 +85,8 @@ public class MensagemParser {
         tokens.removeIf(token -> PALAVRAS_MOEDA.contains(normalizar(token)));
 
         LocalDate data = extrairData(tokens, hoje);
-        return montar(tipo, valor.quantia(), tokens, data);
+        FormaPagamento forma = tipo == TipoLancamento.DESPESA ? extrairFormaPagamento(tokens) : null;
+        return montar(tipo, valor.quantia(), tokens, data, forma);
     }
 
     // ---------- Tipo ----------
@@ -208,9 +215,51 @@ public class MensagemParser {
         }
     }
 
+    // ---------- Forma de pagamento ----------
+
+    private FormaPagamento extrairFormaPagamento(List<String> tokens) {
+        for (int i = 0; i < tokens.size(); i++) {
+            String palavra = normalizar(tokens.get(i));
+            FormaPagamento forma;
+            int fim = i + 1;
+            switch (palavra) {
+                case "cartao" -> {
+                    // "cartão", "cartão de crédito", "cartão débito"...
+                    int j = i + 1;
+                    if (j < tokens.size() && normalizar(tokens.get(j)).equals("de")) {
+                        j++;
+                    }
+                    String tipoCartao = j < tokens.size() ? normalizar(tokens.get(j)) : "";
+                    if (tipoCartao.equals("credito") || tipoCartao.equals("debito")) {
+                        fim = j + 1;
+                        forma = tipoCartao.equals("debito") ? FormaPagamento.DEBITO : FormaPagamento.CREDITO;
+                    } else {
+                        forma = FormaPagamento.CREDITO;
+                    }
+                }
+                case "credito" -> forma = FormaPagamento.CREDITO;
+                case "debito" -> forma = FormaPagamento.DEBITO;
+                case "pix" -> forma = FormaPagamento.PIX;
+                case "dinheiro", "especie" -> forma = FormaPagamento.DINHEIRO;
+                default -> forma = null;
+            }
+            if (forma == null) {
+                continue;
+            }
+            int inicio = i;
+            while (inicio > 0 && PREFIXOS_PAGAMENTO.contains(normalizar(tokens.get(inicio - 1)))) {
+                inicio--;
+            }
+            tokens.subList(inicio, fim).clear();
+            return forma;
+        }
+        return null;
+    }
+
     // ---------- Descrição e detalhe ----------
 
-    private LancamentoInterpretado montar(TipoLancamento tipo, BigDecimal valor, List<String> tokens, LocalDate data) {
+    private LancamentoInterpretado montar(TipoLancamento tipo, BigDecimal valor, List<String> tokens, LocalDate data,
+                                          FormaPagamento forma) {
         // Descarta conectores que só introduzem a descrição ("de salário", "com almoço"),
         // mas mantém os que já introduzem o detalhe ("no mercado").
         while (!tokens.isEmpty()) {
@@ -237,7 +286,7 @@ public class MensagemParser {
         if (descricao == null) {
             descricao = detalhe != null ? detalhe : (tipo == TipoLancamento.RECEITA ? "Entrada" : "Despesa");
         }
-        return new LancamentoInterpretado(tipo, valor, limitar(descricao), limitar(detalhe), data);
+        return new LancamentoInterpretado(tipo, valor, limitar(descricao), limitar(detalhe), data, forma);
     }
 
     private static Set<String> conectoresDetalhe(TipoLancamento tipo) {

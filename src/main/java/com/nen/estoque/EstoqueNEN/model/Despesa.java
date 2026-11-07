@@ -35,4 +35,9 @@ public class Despesa {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
+
+    /** Nulo nas despesas criadas antes deste campo existir. */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private FormaPagamento formaPagamento;
 }

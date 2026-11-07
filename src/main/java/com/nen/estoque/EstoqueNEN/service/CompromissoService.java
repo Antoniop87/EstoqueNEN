@@ -68,7 +68,7 @@ public class CompromissoService {
         }
         LocalDate pagamento = data != null ? data : Datas.hoje();
         Long lancamentoId = lancamentoService.criar(usuario, new LancamentoService.Novo(
-                c.getTipo(), c.getDescricao(), c.getDetalhe(), c.getValor(), pagamento, c.getCategoria()));
+                c.getTipo(), c.getDescricao(), c.getDetalhe(), c.getValor(), pagamento, c.getCategoria(), null));
         c.setPagoEm(pagamento);
         c.setLancamentoId(lancamentoId);
         return CompromissoDto.Response.from(c);

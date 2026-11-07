@@ -1,5 +1,6 @@
 package com.nen.estoque.EstoqueNEN.telegram;
 
+import com.nen.estoque.EstoqueNEN.model.FormaPagamento;
 import com.nen.estoque.EstoqueNEN.model.TipoLancamento;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -160,5 +161,44 @@ class MensagemParserTest {
     @Test
     void valorZeroDaErro() {
         assertThrows(MensagemNaoEntendidaException.class, () -> ler("gastei 0 no mercado"));
+    }
+
+    // ---------- Forma de pagamento ----------
+
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+            "gastei 50 no mercado no crédito          | CREDITO  | Mercado   | mercado",
+            "gastei 120 no cartão de crédito com tênis | CREDITO  | Tênis     |",
+            "uber 32,40 ontem no cartão               | CREDITO  | Uber      |",
+            "almoço 45 no débito                       | DEBITO   | Almoço    |",
+            "paguei 80 de luz no pix                   | PIX      | Luz       |",
+            "gastei 20 em dinheiro com pipoca          | DINHEIRO | Pipoca    |",
+            "farmácia 35,90 cartão débito              | DEBITO   | Farmácia  |",
+            "gastei 20 reais hoje com lazer            |          | Lazer     |",
+    })
+    void reconheceFormaDePagamentoSemSujarADescricao(String mensagem, FormaPagamento forma, String descricao, String detalhe) {
+        LancamentoInterpretado l = ler(mensagem);
+
+        assertEquals(TipoLancamento.DESPESA, l.tipo());
+        assertEquals(forma, l.formaPagamento());
+        assertEquals(descricao, l.descricao());
+        assertEquals(detalhe, l.detalhe() == null ? null : l.detalhe().toLowerCase());
+    }
+
+    @Test
+    void creditoNoComecoContinuaSendoEntradaSemFormaDePagamento() {
+        LancamentoInterpretado l = ler("crédito 50 reembolso");
+
+        assertEquals(TipoLancamento.RECEITA, l.tipo());
+        assertNull(l.formaPagamento());
+        assertEquals("Reembolso", l.descricao());
+    }
+
+    @Test
+    void entradaNaoGanhaFormaDePagamento() {
+        LancamentoInterpretado l = ler("recebi 200 no pix do João");
+
+        assertEquals(TipoLancamento.RECEITA, l.tipo());
+        assertNull(l.formaPagamento());
     }
 }
