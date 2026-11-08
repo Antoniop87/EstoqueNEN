@@ -4,3 +4,6 @@
 # Bot do Telegram (crie com o @BotFather)
 telegram.bot.username=UserNickFinanceBot
 telegram.bot.token=COLE_AQUI_O_TOKEN
+
+# Assistente Nino: crie a chave em https://console.groq.com/keys
+groq.api-key=COLE_AQUI_A_CHAVE
