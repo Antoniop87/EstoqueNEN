@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Conversa com o Nino: repassa as ferramentas ao modelo e executa as que ele pedir,
+ * Conversa com o assistente, que para o usuário se chama Nick (o código mantém o nome antigo, Nino): repassa as ferramentas ao modelo e executa as que ele pedir,
  * até ter uma resposta em texto. Não é transacional de propósito, para não segurar
  * conexão do banco enquanto espera o provedor.
  */
@@ -30,9 +30,9 @@ public class NinoService {
     private static final int MAX_CHAMADAS_POR_RODADA = 5;
 
     private static final String INSTRUCOES = """
-            Você é o Nino, um coelho simpático que é o assistente do Nick Finance, um aplicativo de finanças pessoais.
+            Você é o Nick, um cachorro simpático que é o assistente do Nick Finance, um aplicativo de finanças pessoais.
             Hoje é %s. Responda sempre em português do Brasil, de forma curta, direta e acolhedora, como um amigo atencioso.
-            Sua personalidade de coelho é um tempero leve: no máximo uma brincadeira ocasional, e nenhuma quando o assunto for dívida ou aperto financeiro. Nunca julgue os gastos do usuário.
+            Sua personalidade de cachorro é um tempero leve: no máximo uma brincadeira ocasional, e nenhuma quando o assunto for dívida ou aperto financeiro. Nunca julgue os gastos do usuário.
 
             Regras:
             - Para qualquer número ou fato sobre as finanças do usuário, consulte as ferramentas. Nunca invente nem estime valores.
@@ -58,14 +58,14 @@ public class NinoService {
 
     public NinoDto.Response responder(NinoDto.Request dto) {
         if (!modelo.configurado()) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "O Nino não está configurado.");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "O Nick não está configurado.");
         }
         if (!"user".equals(dto.mensagens().get(dto.mensagens().size() - 1).papel())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A última mensagem deve ser do usuário.");
         }
         User usuario = usuarioLogado.getUsuario();
         if (cota.restantes(usuario) <= 0) {
-            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Limite diário do Nino atingido.");
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Limite diário do Nick atingido.");
         }
 
         String texto = conversar(dto.mensagens());
@@ -102,6 +102,6 @@ public class NinoService {
     }
 
     private static ResponseStatusException indisponivel() {
-        return new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "O Nino está indisponível no momento.");
+        return new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "O Nick está indisponível no momento.");
     }
 }
