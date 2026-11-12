@@ -23,3 +23,7 @@ services:
         sync: false
       - key: GROQ_API_KEY
         sync: false
+      - key: PLUGGY_CLIENT_ID
+        sync: false
+      - key: PLUGGY_CLIENT_SECRET
+        sync: false

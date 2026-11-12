@@ -10,7 +10,8 @@ public class SecurityConfigurationFilter {
     public static final String [] ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED = {
             "/users/login", //url que usaremos para fazer login
             "/users", //url que usaremos para criar um usuário
-            "/health" //verificação de saúde
+            "/health", //verificação de saúde
+            "/pluggy/webhook" //avisos da Pluggy
     };
 
 }

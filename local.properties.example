@@ -7,3 +7,7 @@ telegram.bot.token=COLE_AQUI_O_TOKEN
 
 # Assistente Nino: crie a chave em https://console.groq.com/keys
 groq.api-key=COLE_AQUI_A_CHAVE
+
+# Integracao bancaria (Pluggy): client id e secret do painel em https://dashboard.pluggy.ai
+pluggy.client-id=COLE_AQUI_O_CLIENT_ID
+pluggy.client-secret=COLE_AQUI_O_CLIENT_SECRET
