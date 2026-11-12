@@ -24,7 +24,8 @@ public class SecurityConfiguration {
             "/users/login", // Url que usaremos para fazer login
             "/users", // Url que usaremos para criar um usuário
             "/error", // Página de erro do Spring; sem isso, 400/500 viram 403
-            "/health", // Verificação de saúde (host e monitor)
+            "/health", // Verificação de saúde (host)
+            "/ping", // Mantém a API acordada sem tocar no banco (UptimeRobot)
             "/pluggy/webhook" // Avisos da Pluggy; os dados são buscados de volta com a nossa chave
     };
 

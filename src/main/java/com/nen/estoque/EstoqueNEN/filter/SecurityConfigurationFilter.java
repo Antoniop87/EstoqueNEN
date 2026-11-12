@@ -11,6 +11,7 @@ public class SecurityConfigurationFilter {
             "/users/login", //url que usaremos para fazer login
             "/users", //url que usaremos para criar um usuário
             "/health", //verificação de saúde
+            "/ping", //monitor que mantém a API acordada
             "/pluggy/webhook" //avisos da Pluggy
     };
 

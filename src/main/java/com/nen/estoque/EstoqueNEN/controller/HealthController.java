@@ -10,14 +10,20 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 /**
- * Verificação de saúde, pública. Usada pelo host (health check) e por monitores
- * que acessam a API periodicamente para ela não "dormir" no plano gratuito.
+ * Verificações públicas. `/health` confere o banco e é usado pelo host (health check).
+ * `/ping` não toca no banco: é o que monitores como o UptimeRobot devem chamar para a API
+ * não "dormir" no plano gratuito sem manter o Neon acordado o tempo todo.
  */
 @RestController
 @RequiredArgsConstructor
 public class HealthController {
 
     private final JdbcTemplate jdbcTemplate;
+
+    @GetMapping("/ping")
+    public ResponseEntity<Map<String, String>> ping() {
+        return ResponseEntity.ok(Map.of("status", "ok"));
+    }
 
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {
