@@ -92,6 +92,22 @@ class BancoIntegracaoTest {
     }
 
     @Test
+    void mesmoBancoConectadoDuasVezesMarcaPossivelDuplicado() {
+        bancos.conectar(itemId);
+
+        String segundo = UUID.randomUUID().toString();
+        when(pluggy.buscarItem(segundo)).thenReturn(
+                new PluggyCliente.Item(segundo, String.valueOf(usuario.getId()), "Banco Teste", "UPDATED", null));
+        when(pluggy.contas(segundo)).thenReturn(List.of(new PluggyCliente.Conta("conta-2", "BANK", "Conta corrente")));
+        when(pluggy.transacoes(eq("conta-2"), any())).thenReturn(List.of(transacao("d", "-20", "Uber")));
+        bancos.conectar(segundo);
+
+        List<BancoDto.Transacao> uber = bancos.pendentes().stream().filter(t -> t.descricao().equals("Uber")).toList();
+        assertEquals(2, uber.size());
+        assertEquals(1, uber.stream().filter(BancoDto.Transacao::possivelDuplicado).count());
+    }
+
+    @Test
     void recusaItemDeOutroUsuario() {
         when(pluggy.buscarItem(itemId)).thenReturn(
                 new PluggyCliente.Item(itemId, "outro", "Banco Teste", "UPDATED", null));

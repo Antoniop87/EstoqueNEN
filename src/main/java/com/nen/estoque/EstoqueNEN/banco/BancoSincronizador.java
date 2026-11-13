@@ -94,7 +94,7 @@ public class BancoSincronizador {
                 .filter(r -> !existentes.contains(r.transacao().id()))
                 .toList();
 
-        Map<TipoLancamento, List<Lancado>> jaLancados = jaLancados(usuario);
+        Map<TipoLancamento, List<Lancado>> jaLancados = jaLancados(usuario, conexao, novas);
         for (Recebida r : novas) {
             MapeamentoPluggy.Lancamento l = r.lancamento();
             transacoes.save(TransacaoBancaria.builder()
@@ -126,15 +126,27 @@ public class BancoSincronizador {
     private record Lancado(BigDecimal valor, LocalDate data) {
     }
 
-    /** Lançamentos já registrados (à mão, Telegram, app), para avisar de possível duplicado. */
-    private Map<TipoLancamento, List<Lancado>> jaLancados(User usuario) {
+    /**
+     * O que já existe para comparar e avisar de possível duplicado: lançamentos registrados
+     * (à mão, Telegram, app) e transações recebidas por outra conexão do mesmo usuário.
+     */
+    private Map<TipoLancamento, List<Lancado>> jaLancados(User usuario, BancoConexao conexao, List<Recebida> novas) {
         Map<TipoLancamento, List<Lancado>> mapa = new EnumMap<>(TipoLancamento.class);
-        mapa.put(TipoLancamento.DESPESA, despesas.findAllByUsuarioOrderByDataDespesaDescIdDesc(usuario).stream()
+        mapa.put(TipoLancamento.DESPESA, new ArrayList<>(despesas.findAllByUsuarioOrderByDataDespesaDescIdDesc(usuario).stream()
                 .map(d -> new Lancado(d.getValorDespesa(), d.getDataDespesa().toInstant().atZone(ZoneOffset.UTC).toLocalDate()))
-                .toList());
-        mapa.put(TipoLancamento.RECEITA, receitas.findAllByUsuarioOrderByDataDescIdDesc(usuario).stream()
+                .toList()));
+        mapa.put(TipoLancamento.RECEITA, new ArrayList<>(receitas.findAllByUsuarioOrderByDataDescIdDesc(usuario).stream()
                 .map(r -> new Lancado(r.getValor(), r.getData()))
-                .toList());
+                .toList()));
+
+        if (!novas.isEmpty() && conexao.getId() != null) {
+            LocalDate de = novas.stream().map(r -> r.transacao().data()).min(LocalDate::compareTo).orElseThrow().minusDays(1);
+            LocalDate ate = novas.stream().map(r -> r.transacao().data()).max(LocalDate::compareTo).orElseThrow().plusDays(1);
+            // Importadas já viraram lançamento e foram contadas acima.
+            transacoes.deOutrasConexoes(usuario, conexao, de, ate).stream()
+                    .filter(t -> t.getSituacao() == TransacaoBancaria.Situacao.PENDENTE)
+                    .forEach(t -> mapa.get(t.getTipo()).add(new Lancado(t.getValor(), t.getData())));
+        }
         return mapa;
     }
 }

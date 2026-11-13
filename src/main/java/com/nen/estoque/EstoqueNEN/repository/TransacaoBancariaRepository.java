@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,12 @@ public interface TransacaoBancariaRepository extends JpaRepository<TransacaoBanc
 
     @Query("SELECT t.pluggyId FROM TransacaoBancaria t WHERE t.pluggyId IN :ids")
     Set<String> idsExistentes(@Param("ids") Collection<String> ids);
+
+    /** Transações já recebidas por outras conexões do usuário (o mesmo banco conectado duas vezes). */
+    @Query("SELECT t FROM TransacaoBancaria t WHERE t.usuario = :usuario AND t.conexao <> :conexao"
+            + " AND t.data BETWEEN :de AND :ate")
+    List<TransacaoBancaria> deOutrasConexoes(@Param("usuario") User usuario, @Param("conexao") BancoConexao conexao,
+                                             @Param("de") LocalDate de, @Param("ate") LocalDate ate);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("DELETE FROM TransacaoBancaria t WHERE t.conexao = :conexao")

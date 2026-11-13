@@ -97,9 +97,13 @@ public class PluggyCliente {
         return clientId;
     }
 
-    /** Os avisos chegam pelo webhook cadastrado no painel da Pluggy, não por token. */
+    /**
+     * Os avisos chegam pelo webhook cadastrado no painel da Pluggy, não por token.
+     * Sem `avoidDuplicates`: com ele, uma conexão antiga perdida na Pluggy (ex.: teste no painel)
+     * impede o usuário de conectar o mesmo banco. Repetições viram "possível duplicado" na revisão.
+     */
     public String criarConnectToken(String clientUserId) {
-        Map<String, Object> opcoes = Map.of("clientUserId", clientUserId, "avoidDuplicates", true);
+        Map<String, Object> opcoes = Map.of("clientUserId", clientUserId);
         return post("/connect_token", Map.of("options", opcoes)).path("accessToken").asText();
     }
 
